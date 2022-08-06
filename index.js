@@ -4,7 +4,6 @@ require('dotenv').config();
 const line = require('@line/bot-sdk');
 const express = require('express');
 const eta = require("eta")
-const path = require("path")
 
 // create LINE SDK config from env variables
 const config = {
@@ -42,13 +41,33 @@ app.post('/callback', line.middleware(config), (req, res) => {
 
 // event handler
 function handleEvent(event) {
-  if (event.type !== 'message' || event.message.type !== 'text') {
+  console.log(event)
+  if (event.type !== 'message') {
     // ignore non-text-message event
     return Promise.resolve(null);
   }
 
+  switch ( event.message.type ) {
+    case 'text':
+      return textHandler(event)
+    case 'image':
+      return imageHandler(event)
+    default:
+      return Promise.resolve(null);
+  }
+}
+
+function textHandler(event) {
   // create a echoing text message
   const echo = { type: 'text', text: event.message.text };
+
+  // use reply API
+  return client.replyMessage(event.replyToken, echo);
+}
+
+function imageHandler(event) {
+  // create a echoing text message
+  const echo = { type: 'text', text: '已接收照片成功' };
 
   // use reply API
   return client.replyMessage(event.replyToken, echo);
