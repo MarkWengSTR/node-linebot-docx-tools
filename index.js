@@ -3,7 +3,8 @@ require('dotenv').config();
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-const eta = require("eta")
+const eta = require("eta");
+const db = require("./models");
 
 // create LINE SDK config from env variables
 const config = {
@@ -40,8 +41,7 @@ app.post('/callback', line.middleware(config), (req, res) => {
 });
 
 // event handler
-function handleEvent(event) {
-  console.log(event)
+async function handleEvent(event) {
   if (event.type !== 'message') {
     // ignore non-text-message event
     return Promise.resolve(null);
@@ -57,12 +57,33 @@ function handleEvent(event) {
   }
 }
 
-function textHandler(event) {
-  // create a echoing text message
-  const echo = { type: 'text', text: event.message.text };
+function dispathFunctions(messageText) {
+  const exeFuncWithArg = {
+    "新增文件": null,
+    "-": storeHeading
+  }
 
-  // use reply API
-  return client.replyMessage(event.replyToken, echo);
+  const [funcCommend, text] = messageText.replaceAll(' ', '').split(/:|：/)
+
+  return exeFuncWithArg[funcCommend](text)
+}
+
+function storeHeading(text) {
+  return db.Heading.create({
+    text: text,
+    level: 'HEADING_1'
+  }).then(() => {
+      return "儲存標題成功"
+  }).catch((e) => {
+    console.log(e);
+      return "儲存標題失敗"
+  });
+}
+
+async function textHandler(event) {
+  const message = await dispathFunctions(event.message.text)
+
+  return client.replyMessage(event.replyToken, { type: 'text', text: message });
 }
 
 function imageHandler(event) {
