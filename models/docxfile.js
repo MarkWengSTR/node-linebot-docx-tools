@@ -2,26 +2,23 @@
 const {
   Model
 } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
-  class Heading extends Model {
+  class DocxFile extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Heading.belongsTo(models.DocxFile)
+      DocxFile.hasMany(models.Heading)
     }
   }
-  Heading.init({
-    text: DataTypes.STRING,
-    level: DataTypes.STRING,
-    docxfileId: DataTypes.INTEGER
+  DocxFile.init({
+    name: DataTypes.STRING,
+    path: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'Heading',
+    modelName: 'DocxFile',
   });
-
-  return Heading;
+  return DocxFile;
 };

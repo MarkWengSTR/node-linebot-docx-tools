@@ -57,7 +57,7 @@ async function handleEvent(event) {
   }
 }
 
-function dispathFunctions(messageText) {
+function parseAndExec(messageText) {
   const exeFuncWithArg = {
     "新增文件": null,
     "-": storeHeading
@@ -81,7 +81,7 @@ function storeHeading(text) {
 }
 
 async function textHandler(event) {
-  const message = await dispathFunctions(event.message.text)
+  const message = await parseAndExec(event.message.text)
 
   return client.replyMessage(event.replyToken, { type: 'text', text: message });
 }
