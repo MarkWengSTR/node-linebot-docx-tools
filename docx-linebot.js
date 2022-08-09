@@ -127,8 +127,6 @@ async function createDocx(inputName) {
     return await headingsProm.then((hs) => updateDocxIdForHeadings(hs, docxId))
 }
 
-createDocx()
-
 docxLinebot.createDocx = createDocx
 
 module.exports = docxLinebot;

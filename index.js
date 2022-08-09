@@ -31,6 +31,11 @@ app.get('/', (_req, res) => {
   res.render("./index", { name: "mark" })
 })
 
+app.get('/download', (_req, res) => {
+  const file = __dirname + "./static/files/20220809undefined.docx" 
+  res.download(file)
+})
+
 // register a webhook handler with middleware
 // about the middleware, please refer to doc
 app.post('/callback', line.middleware(config), (req, res) => {
