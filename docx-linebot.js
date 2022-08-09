@@ -4,7 +4,7 @@ const db = require("./models")
 const moment = require('moment');
 const { Op } = require("sequelize");
 
-const { Document, TextRun, ImageRun, Packer, Paragraph, HeadingLevel } = docx;
+const { Document, ImageRun, Packer, Paragraph, HeadingLevel } = docx;
 const docxLinebot = {};
 
 function selectTodayheadings() {
@@ -23,22 +23,49 @@ function selectTodayheadings() {
                     TODAY_END
                 ]
             }
-        }
+        },
+        include: [{
+            model: db.Image,
+            attributes: [
+                'path'
+            ]
+        }],
+        order: [ ['id', 'ASC'] ]
     })
 }
 
 function genDocx(sqResHeadings, docPath) {
-    function genHeadingInstance(text) {
+    function genImageInstance(imagePath) {
         return new Paragraph({
-            text: text,
+            children: [
+                new ImageRun({
+                    data: fs.readFileSync(imagePath),
+                    transformation: {
+                        width: 300,
+                        height: 300
+                    }
+                })
+            ]
+        })
+    }
+
+    function genContInHeadingInstance(sqResHeading) {
+        const allContent = [];
+
+        const titleInst = new Paragraph({
+            text: sqResHeading.text,
             heading: HeadingLevel.HEADING_1,
         })
+
+        const imageInst = sqResHeading.Images.map((img) => genImageInstance(img.path));
+
+        return allContent.concat(titleInst, imageInst)
     }
 
     const doc = new Document({
         sections: [
             {
-                children: sqResHeadings.map((h) => genHeadingInstance(h.text)),
+                children: sqResHeadings.map((h) => genContInHeadingInstance(h)).flat(),
             },
         ],
     });
@@ -58,7 +85,6 @@ function saveDocxData(docxName, docxPath) {
         if (createdNew) {
             return docx
         } else {
-            console.log(docx.version);
             docx.update(
                 { version: docx.version + 1 }
             )
@@ -101,53 +127,9 @@ async function createDocx(inputName) {
     return await headingsProm.then((hs) => updateDocxIdForHeadings(hs, docxId))
 }
 
+createDocx()
+
 docxLinebot.createDocx = createDocx
 
 module.exports = docxLinebot;
 
-// saveDocxData(docxName, path)
-// assocHsToDocx(hs, docxId)
-
-// const doc = new Document({
-//     sections: [
-//         {
-//             children: [
-//                 new Paragraph({
-//                     text: "Text Header",
-//                     heading: HeadingLevel.HEADING_1,
-//                 }),
-//                 new Paragraph({
-//                     children: [
-//                         new TextRun({
-//                             text: "Foo Bar",
-//                             bold: true,
-//                             size: "18pt"
-//                         }),
-//                         new TextRun("Hello World"),
-//                         new TextRun({
-//                             text: "Github is the best",
-//                             bold: true,
-//                             size: "12pt"
-//                         }),
-//                     ],
-//                 }),
-//                 new Paragraph({
-//                     children: [
-//                         new ImageRun({
-//                             data: fs.readFileSync("./approved_mail.jpg"),
-//                             transformation: {
-//                                 width: 500,
-//                                 height: 500
-//                             }
-//                         })
-//                     ]
-//                 })
-//             ],
-//         },
-//     ],
-// });
-
-// Used to export the file into a .docx file
-// Packer.toBuffer(doc).then((buffer) => {
-//     fs.writeFileSync("./static/files/20220808.docx", buffer);
-// });
