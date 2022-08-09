@@ -17,7 +17,9 @@ module.exports = (sequelize, DataTypes) => {
   Heading.init({
     text: DataTypes.STRING,
     level: DataTypes.STRING,
-    docxfileId: DataTypes.INTEGER
+    docxfileId: DataTypes.INTEGER,
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Heading',

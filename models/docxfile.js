@@ -15,7 +15,13 @@ module.exports = (sequelize, DataTypes) => {
   }
   DocxFile.init({
     name: DataTypes.STRING,
-    path: DataTypes.STRING
+    path: DataTypes.STRING,
+    version: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    }, 
+    createdAt: DataTypes.DATE,
+    updatedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'DocxFile',

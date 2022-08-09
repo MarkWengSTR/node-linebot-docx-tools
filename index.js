@@ -5,6 +5,7 @@ const line = require('@line/bot-sdk');
 const express = require('express');
 const eta = require("eta");
 const db = require("./models");
+const docxLinebot = require("./docx-linebot")
 
 // create LINE SDK config from env variables
 const config = {
@@ -59,13 +60,22 @@ async function handleEvent(event) {
 
 function parseAndExec(messageText) {
   const exeFuncWithArg = {
-    "新增文件": null,
+    "產生文件": produceDocx,
     "-": storeHeading
   }
 
   const [funcCommend, text] = messageText.replaceAll(' ', '').split(/:|：/)
 
   return exeFuncWithArg[funcCommend](text)
+}
+
+function produceDocx(inputName) {
+  return docxLinebot.createDocx(inputName)
+    .then(()=>("產生文件成功"))
+    .catch((e) => {
+      console.log(e);
+      return "產生文件失敗"
+    })
 }
 
 function storeHeading(text) {

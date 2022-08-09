@@ -5,6 +5,7 @@ const moment = require('moment');
 const { Op } = require("sequelize");
 
 const { Document, TextRun, ImageRun, Packer, Paragraph, HeadingLevel } = docx;
+const docxLinebot = {};
 
 function selectTodayheadings() {
     const TODAY_START = moment().format('YYYY-MM-DD 00:00');
@@ -48,11 +49,22 @@ function genDocx(sqResHeadings, docPath) {
 }
 
 function saveDocxData(docxName, docxPath) {
-    return db.DocxFile.create({
-        name: docxName,
-        path: docxPath
-    }).then((res) => {
-        return res
+    return db.DocxFile.findOrCreate({
+        where: {
+            name: docxName,
+            path: docxPath,
+        }
+    }).then(([docx, createdNew]) => {
+        if (createdNew) {
+            return docx
+        } else {
+            console.log(docx.version);
+            docx.update(
+                { version: docx.version + 1 }
+            )
+            docx.reload()
+            return docx
+        }
     }).catch((e) => {
         console.log(e);
     });
@@ -75,9 +87,8 @@ function updateDocxIdForHeadings(headings, docxId) {
     )
 }
 
-async function createDocxByData() {
-    const nameFromInput = "EVA歲修";
-    const docxName = moment().format('YYYYMMDD') + nameFromInput;
+async function createDocx(inputName) {
+    const docxName = moment().format('YYYYMMDD') + inputName;
     const docxPath = `./static/files/${docxName}.docx`;
 
     const headingsProm = selectTodayheadings();
@@ -90,7 +101,9 @@ async function createDocxByData() {
     return await headingsProm.then((hs) => updateDocxIdForHeadings(hs, docxId))
 }
 
-createDocxByData()
+docxLinebot.createDocx = createDocx
+
+module.exports = docxLinebot;
 
 // saveDocxData(docxName, path)
 // assocHsToDocx(hs, docxId)
