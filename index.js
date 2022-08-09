@@ -5,6 +5,7 @@ const line = require('@line/bot-sdk');
 const express = require('express');
 const eta = require("eta");
 const fs = require("fs");
+const moment = require('moment');
 const db = require("./models");
 const docxLinebot = require("./docx-linebot")
 
@@ -106,10 +107,28 @@ function storeHeading(text) {
   });
 }
 
+async function storeImageRecord(imageName, imagePath) {
+  const lastHeading = await db.Heading.findOne({ order: [['id', 'DESC']] });
+
+  return db.Image.create({
+    name: imageName,
+    path: imagePath,
+    headingId: lastHeading.id
+  }).then(() => "照片已建檔")
+    .catch((e) => {
+      console.log(e);
+      return "照片建檔失敗"
+    })
+
+}
+
 async function imageProcess(event) {
-  return await bot.getMessageContent(event.message.id)
+  const imageName = moment().format('YYYYMMDD_HHMMSSSSS')
+  const imagePath = `./static/images/${imageName}.jpg`
+
+  const imageFileStoreMsg = await bot.getMessageContent(event.message.id)
     .then((stream) => {
-      const file = fs.createWriteStream("./static/images/test.jpg");
+      const file = fs.createWriteStream(imagePath);
 
       stream.pipe(file)
 
@@ -118,6 +137,10 @@ async function imageProcess(event) {
       console.log(e)
       return "圖片儲存失敗"
     })
+
+  const imageRecStoreMsg = await storeImageRecord(imageName, imagePath)
+
+  return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
 }
 
 // listen on port
