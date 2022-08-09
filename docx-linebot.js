@@ -115,7 +115,7 @@ function updateDocxIdForHeadings(headings, docxId) {
 
 async function createDocx(inputName) {
     const docxName = moment().format('YYYYMMDD') + inputName;
-    const docxPath = `./static/files/${docxName}.docx`;
+    const docxPath = `./assets/files/${docxName}.docx`;
 
     const headingsProm = selectTodayheadings();
 

@@ -32,7 +32,7 @@ app.get('/', (_req, res) => {
 })
 
 app.get('/:docxname', (req, res) => {
-  const file = `${__dirname}/static/files/${req.params.docxname}.docx`
+  const file = `${__dirname}/assets/files/${req.params.docxname}.docx`
   res.download(file)
 })
 
@@ -49,7 +49,7 @@ app.post('/callback', line.middleware(config), (req, res) => {
 });
 
 function findAllDocx() {
-  return fs.readdirSync(`${__dirname}/static/files/`).map((f) => {
+  return fs.readdirSync(`${__dirname}/assets/files/`).map((f) => {
     return f.split('.')[0]
   });
 }
@@ -135,7 +135,7 @@ async function storeImageRecord(imageName, imagePath) {
 
 async function imageProcess(event) {
   const imageName = moment().format('YYYYMMDD_HHMMSSSSS')
-  const imagePath = `./static/images/${imageName}.jpg`
+  const imagePath = `./assets/images/${imageName}.jpg`
 
   const imageFileStoreMsg = await bot.getMessageContent(event.message.id)
     .then((stream) => {
