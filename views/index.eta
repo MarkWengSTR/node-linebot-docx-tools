@@ -1,1 +1,15 @@
-<h1> my name is <%= it.name %></h1>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Mark Tools</title>
+  </head>
+  <body>
+    <h1>Welcome to Mark line bot for office words Tools</h1>
+    <h2>The Docx List as Below</h2>
+    <% it.docxs.forEach(function(docx) { %>
+      <li><a href="/<%= docx %>"><%= docx %></a></li>
+    <% }) %>
+  </body>
+</html>

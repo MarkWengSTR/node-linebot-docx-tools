@@ -28,11 +28,11 @@ app.set("views", "./views")
 
 
 app.get('/', (_req, res) => {
-  res.render("./index", { name: "mark" })
+  res.render("./index", { docxs: findAllDocx() })
 })
 
-app.get('/download', (_req, res) => {
-  const file = __dirname + "./static/files/20220809undefined.docx" 
+app.get('/:docxname', (req, res) => {
+  const file = `${__dirname}/static/files/${req.params.docxname}.docx`
   res.download(file)
 })
 
@@ -47,6 +47,12 @@ app.post('/callback', line.middleware(config), (req, res) => {
       res.status(500).end();
     });
 });
+
+function findAllDocx() {
+  return fs.readdirSync(`${__dirname}/static/files/`).map((f) => {
+    return f.split('.')[0]
+  });
+}
 
 // event handler
 async function handleEvent(event) {
