@@ -4,6 +4,7 @@ require('dotenv').config();
 const line = require('@line/bot-sdk');
 const express = require('express');
 const eta = require("eta");
+const fs = require("fs");
 const db = require("./models");
 const docxLinebot = require("./docx-linebot")
 
@@ -14,7 +15,7 @@ const config = {
 };
 
 // create LINE SDK client
-const client = new line.Client(config);
+const bot = new line.Client(config);
 
 // create Express app
 // about Express itself: https://expressjs.com/
@@ -58,6 +59,21 @@ async function handleEvent(event) {
   }
 }
 
+async function textHandler(event) {
+  const message = await parseAndExec(event.message.text)
+
+  return bot.replyMessage(event.replyToken, { type: 'text', text: message });
+}
+
+async function imageHandler(event) {
+  // create a echoing text message
+  const message = await imageProcess(event);
+
+  // use reply API
+  return bot.replyMessage(event.replyToken, { type: 'text', text: message });
+}
+
+
 function parseAndExec(messageText) {
   const exeFuncWithArg = {
     "產生文件": produceDocx,
@@ -90,18 +106,18 @@ function storeHeading(text) {
   });
 }
 
-async function textHandler(event) {
-  const message = await parseAndExec(event.message.text)
+async function imageProcess(event) {
+  return await bot.getMessageContent(event.message.id)
+    .then((stream) => {
+      const file = fs.createWriteStream("./static/images/test.jpg");
 
-  return client.replyMessage(event.replyToken, { type: 'text', text: message });
-}
+      stream.pipe(file)
 
-function imageHandler(event) {
-  // create a echoing text message
-  const echo = { type: 'text', text: '已接收照片成功' };
-
-  // use reply API
-  return client.replyMessage(event.replyToken, echo);
+      return "圖片儲存成功"
+    }).catch((e) => {
+      console.log(e)
+      return "圖片儲存失敗"
+    })
 }
 
 // listen on port
