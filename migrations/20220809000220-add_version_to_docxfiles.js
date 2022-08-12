@@ -4,13 +4,13 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     // logic for transforming into the new state
     return queryInterface.addColumn(
-      'docxfiles',
+      'DocxFiles',
       'version',
       Sequelize.INTEGER
     );
   },
 
   async down (queryInterface) {
-    return queryInterface.removeColumn('docxfiles', 'version')
+    return queryInterface.removeColumn('DocxFiles', 'version')
   }
 };
