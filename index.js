@@ -87,9 +87,15 @@ async function imageHandler(event) {
 
 
 function parseAndExec(messageText) {
+  function manual(_) {
+    return Object.keys(exeFuncWithArg).join(": ,\n")
+  }
+
   const exeFuncWithArg = {
     "產生文件": produceDocx,
-    "-": storeHeading
+    "-": storeHeading,
+    "網頁": (_) => ("https://marklinebot.ddns.net/"),
+    "手冊": manual
   }
 
   const [funcCommend, text] = messageText.replaceAll(' ', '').split(/:|：/)
