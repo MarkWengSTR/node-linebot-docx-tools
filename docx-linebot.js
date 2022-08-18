@@ -34,7 +34,21 @@ function selectTodayheadings() {
     })
 }
 
-function genDocx(sqResHeadings, docPath) {
+function genDocx(sqResHeadings, docPath, bot) {
+    function storeImageFile(imagePath, eventId) {
+      return bot.getMessageContent(eventId)
+        .then((stream) => {
+          const file = fs.createWriteStream(imagePath);
+
+          stream.pipe(file)
+
+          return "圖片儲存成功"
+        }).catch((e) => {
+          console.log(e)
+          return "圖片儲存失敗"
+        })
+    }
+
     function genImageInstance(imagePath) {
         return new Paragraph({
             children: [
@@ -56,6 +70,8 @@ function genDocx(sqResHeadings, docPath) {
             text: sqResHeading.text,
             heading: HeadingLevel.HEADING_1,
         })
+
+        sqResHeading.Images.map((img) => storeImageFile(img.path, img.eventId))
 
         const imageInst = sqResHeading.Images.map((img) => genImageInstance(img.path));
 
@@ -113,14 +129,14 @@ function updateDocxIdForHeadings(headings, docxId) {
     )
 }
 
-async function createDocx(inputName) {
+async function createDocx(inputName, bot) {
     const docxName = moment().format('YYYYMMDD') + inputName;
     const docxPath = `./assets/files/${docxName}.docx`;
 
     const headingsProm = selectTodayheadings();
 
     const docxId = await headingsProm
-        .then((hs) => genDocx(hs, docxPath))
+        .then((hs) => genDocx(hs, docxPath, bot))
         .then(() => saveDocxData(docxName, docxPath))
         .then((res) => res.id);
 

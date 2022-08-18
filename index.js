@@ -104,7 +104,7 @@ function parseAndExec(messageText) {
 }
 
 function produceDocx(inputName) {
-  return docxLinebot.createDocx(inputName)
+  return docxLinebot.createDocx(inputName, bot)
     .then(()=>("產生文件成功"))
     .catch((e) => {
       console.log(e);
