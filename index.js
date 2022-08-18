@@ -124,13 +124,16 @@ function storeHeading(text) {
   });
 }
 
-async function storeImageRecord(imageName, imagePath) {
+async function storeImageRecord(imageName, imagePath, eventId) {
   const lastHeading = await db.Heading.findOne({ order: [['id', 'DESC']] });
+
+  console.log(eventId)
 
   return db.Image.create({
     name: imageName,
     path: imagePath,
-    headingId: lastHeading.id
+    headingId: lastHeading.id,
+    eventId: eventId
   }).then(() => "照片已建檔")
     .catch((e) => {
       console.log(e);
@@ -155,7 +158,7 @@ async function imageProcess(event) {
       return "圖片儲存失敗"
     })
 
-  const imageRecStoreMsg = await storeImageRecord(imageName, imagePath)
+  const imageRecStoreMsg = await storeImageRecord(imageName, imagePath, event.message.id)
 
   return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
 }
