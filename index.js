@@ -127,9 +127,7 @@ function storeHeading(text) {
 async function storeImageRecord(imageName, imagePath, eventId) {
   const lastHeading = await db.Heading.findOne({ order: [['id', 'DESC']] });
 
-  console.log(eventId)
-
-  return db.Image.create({
+  return await db.Image.create({
     name: imageName,
     path: imagePath,
     headingId: lastHeading.id,
@@ -142,11 +140,9 @@ async function storeImageRecord(imageName, imagePath, eventId) {
 
 }
 
-async function imageProcess(event) {
-  const imageName = moment().format('YYYYMMDD_HHMMSSSSS')
-  const imagePath = `./assets/images/${imageName}.jpg`
 
-  const imageFileStoreMsg = await bot.getMessageContent(event.message.id)
+async function storeImageFile(imagePath, eventId) {
+  return bot.getMessageContent(eventId)
     .then((stream) => {
       const file = fs.createWriteStream(imagePath);
 
@@ -157,8 +153,15 @@ async function imageProcess(event) {
       console.log(e)
       return "圖片儲存失敗"
     })
+}
 
-  const imageRecStoreMsg = await storeImageRecord(imageName, imagePath, event.message.id)
+async function imageProcess(event) {
+  const imageName = moment().format('YYYYMMDD_HHMMSSSSS')
+  const imagePath = `./assets/images/${imageName}.jpg`
+
+  const imageRecStoreMsg = await storeImageRecord(imageName, imagePath, event.message.id);
+
+  const imageFileStoreMsg = await storeImageFile(imagePath, event.message.id);
 
   return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
 }
