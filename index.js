@@ -7,7 +7,9 @@ const eta = require("eta");
 const fs = require("fs");
 const moment = require('moment');
 const db = require("./models");
-const docxLinebot = require("./docx-linebot")
+const docxLinebot = require("./docx-linebot");
+const { pipeline } = require('stream');
+const uuid = require("uuid")
 
 // create LINE SDK config from env variables
 const config = {
@@ -142,21 +144,29 @@ async function storeImageRecord(imageName, imagePath, eventId) {
 
 
 async function storeImageFile(imagePath, eventId) {
+  async function fileStore(reableStream, imagePath) {
+    return await pipeline(
+      reableStream,
+      fs.createWriteStream(imagePath),
+      (e) => {
+        console.log(e)
+        return false
+      }
+    )
+  }
+
   return bot.getMessageContent(eventId)
     .then((stream) => {
-      const file = fs.createWriteStream(imagePath);
-
-      stream.pipe(file)
-
-      return "圖片儲存成功"
-    }).catch((e) => {
-      console.log(e)
-      return "圖片儲存失敗"
+      if (fileStore(stream, imagePath)) {
+        return "圖片儲存成功"
+      } else {
+        return "圖片儲存失敗"
+      }
     })
 }
 
 async function imageProcess(event) {
-  const imageName = moment().format('YYYYMMDD_HHMMSSSSS')
+  const imageName = moment().format('YYYYMMDD_HHMMSS') + "_" + uuid.v4();
   const imagePath = `./assets/images/${imageName}.jpg`
 
   const imageRecStoreMsg = await storeImageRecord(imageName, imagePath, event.message.id);
