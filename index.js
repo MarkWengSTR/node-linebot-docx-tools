@@ -161,9 +161,11 @@ async function imageProcess(event) {
 
   const imageRecStoreMsg = await storeImageRecord(imageName, imagePath, event.message.id);
 
-  const imageFileStoreMsg = await storeImageFile(imagePath, event.message.id);
+  // const imageFileStoreMsg = await storeImageFile(imagePath, event.message.id);
 
-  return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
+  // return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
+
+  return imageRecStoreMsg
 }
 
 // listen on port

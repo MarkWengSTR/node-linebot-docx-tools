@@ -27,7 +27,8 @@ function selectTodayheadings() {
         include: [{
             model: db.Image,
             attributes: [
-                'path'
+                'path',
+                'eventId'
             ]
         }],
         order: [ ['id', 'ASC'] ]
@@ -35,9 +36,10 @@ function selectTodayheadings() {
 }
 
 function genDocx(sqResHeadings, docPath, bot) {
-    function storeImageFile(imagePath, eventId) {
-      return bot.getMessageContent(eventId)
+    async function storeImageFile(imagePath, eventId) {
+      return await bot.getMessageContent(eventId)
         .then((stream) => {
+
           const file = fs.createWriteStream(imagePath);
 
           stream.pipe(file)
@@ -63,7 +65,7 @@ function genDocx(sqResHeadings, docPath, bot) {
         })
     }
 
-    function genContInHeadingInstance(sqResHeading) {
+    async function genContInHeadingInstance(sqResHeading) {
         const allContent = [];
 
         const titleInst = new Paragraph({
@@ -71,7 +73,7 @@ function genDocx(sqResHeadings, docPath, bot) {
             heading: HeadingLevel.HEADING_1,
         })
 
-        sqResHeading.Images.map((img) => storeImageFile(img.path, img.eventId))
+        await Promise.all(sqResHeading.Images.map(async (img) => await storeImageFile(img.path, img.eventId)))
 
         const imageInst = sqResHeading.Images.map((img) => genImageInstance(img.path));
 
