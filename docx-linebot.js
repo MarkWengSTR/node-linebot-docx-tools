@@ -7,7 +7,7 @@ const { Op } = require("sequelize");
 const { Document, ImageRun, Packer, Paragraph, HeadingLevel } = docx;
 const docxLinebot = {};
 
-function selectTodayheadings() {
+function selectTodayheadings(_) {
     const TODAY_START = moment().format('YYYY-MM-DD 00:00');
     const TODAY_END = moment().format('YYYY-MM-DD 23:59');
 
@@ -34,6 +34,30 @@ function selectTodayheadings() {
         }],
         order: [ ["Images", 'id', 'ASC'] ]
     })
+}
+
+function selectHeadingByText(inputText) {
+    return db.Heading.findAll({
+        attributes: [
+            'id',
+            'text'
+        ],
+        where: {
+            text: {
+                [Op.like]: '%' + inputText + '%'
+            }
+        },
+        include: [{
+            model: db.Image,
+            attributes: [
+                'path'
+            ],
+            as: "Images",
+            order: [ ['id', 'DESC'] ]
+        }],
+        order: [ ["Images", 'id', 'ASC'] ]
+    })
+
 }
 
 function genDocx(sqResHeadings, docPath) {
@@ -116,10 +140,12 @@ function updateDocxIdForHeadings(headings, docxId) {
 }
 
 async function createDocx(inputName) {
-    const docxName = moment().format('YYYYMMDD') + inputName;
+    const docxName = inputName + "-" + "Generate at " + moment().format('YYYYMMDD')
     const docxPath = `./assets/files/${docxName}.docx`;
 
-    const headingsProm = selectTodayheadings();
+    const headingPromFunc = ( inputName === "今日" ) ? selectTodayheadings : selectHeadingByText;
+
+    const headingsProm = headingPromFunc(inputName);
 
     const docxId = await headingsProm
         .then((hs) => genDocx(hs, docxPath))
