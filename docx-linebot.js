@@ -28,9 +28,11 @@ function selectTodayheadings() {
             model: db.Image,
             attributes: [
                 'path'
-            ]
+            ],
+            as: "Images",
+            order: [ ['id', 'DESC'] ]
         }],
-        order: [ ['id', 'ASC'] ]
+        order: [ ["Images", 'id', 'ASC'] ]
     })
 }
 
