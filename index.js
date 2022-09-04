@@ -51,9 +51,12 @@ app.post('/callback', line.middleware(config), (req, res) => {
 });
 
 function findAllDocx() {
-  return fs.readdirSync(`${__dirname}/assets/files/`).map((f) => {
-    return f.split('.')[0]
-  });
+  return fs.readdirSync(`${__dirname}/assets/files/`).map((filename) => ({
+    name: filename,
+    time: fs.statSync(`${__dirname}/assets/files/${filename}`).mtime.getTime()
+  }))
+    .sort((a, b)=> a.time - b.time)
+    .map(file => file.name)
 }
 
 // event handler
