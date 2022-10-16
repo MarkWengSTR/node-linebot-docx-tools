@@ -34,7 +34,7 @@ app.get('/', (_req, res) => {
 })
 
 app.get('/:docxname', (req, res) => {
-  const file = `${__dirname}/assets/files/${req.params.docxname}.docx`
+  const file = `${__dirname}/assets/files/${req.params.docxname}`
   res.download(file)
 })
 
