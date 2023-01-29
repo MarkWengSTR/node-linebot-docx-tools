@@ -99,7 +99,7 @@ function parseAndExec(messageText) {
   const exeFuncWithArg = {
     "產生文件": produceDocx,
     "-": storeHeading,
-    "網頁": (_) => ("https://marklinebot.ddns.net/"),
+    "網頁": (_) => ("https://worklinebot.servehttp.com"),
     "手冊": manual
   }
 
