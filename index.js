@@ -10,6 +10,7 @@ const db = require("./models");
 const docxLinebot = require("./docx-linebot");
 const { pipeline } = require('stream');
 const uuid = require("uuid")
+const { Configuration, OpenAIApi } = require("openai");
 
 // create LINE SDK config from env variables
 const config = {
@@ -100,7 +101,8 @@ function parseAndExec(messageText) {
     "產生文件": produceDocx,
     "-": storeHeading,
     "網頁": (_) => ("https://worklinebot.servehttp.com"),
-    "手冊": manual
+    "手冊": manual,
+    "gpt": chatWithGPT3,
   }
 
   const [funcCommend, text] = messageText.replaceAll(' ', '').split(/:|：/)
@@ -177,6 +179,21 @@ async function imageProcess(event) {
   const imageFileStoreMsg = await storeImageFile(imagePath, event.message.id);
 
   return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
+}
+
+async function chatWithGPT3(message) {
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  const openai = new OpenAIApi(configuration);
+
+  const completion = await openai.createCompletion({
+    model: "text-davinci-003",
+    prompt: message,
+    max_tokens: 200,
+  });
+
+  return completion.data.choices[0].text.trim()
 }
 
 // listen on port
