@@ -36,6 +36,37 @@ function selectTodayheadings(_) {
     })
 }
 
+function selectHeadingsBetweenDays(inputText) {
+    const [startDayStr, endDayStr] = inputText.replaceAll(' ', '').split("-")
+    const DAY_START = moment(startDayStr, "YYYYMMDD").format('YYYY-MM-DD 00:00');
+    const DAY_END = moment(endDayStr, "YYYYMMDD").format('YYYY-MM-DD 23:59');
+
+
+    return db.Heading.findAll({
+        attributes: [
+            'id',
+            'text'
+        ],
+        where: {
+            createdAt: {
+                [Op.between]: [
+                    DAY_START,
+                    DAY_END
+                ]
+            }
+        },
+        include: [{
+            model: db.Image,
+            attributes: [
+                'path'
+            ],
+            as: "Images",
+            order: [ ['id', 'DESC'] ]
+        }],
+        order: [ ["Images", 'id', 'ASC'] ]
+    })
+}
+
 function selectHeadingByText(inputText) {
     return db.Heading.findAll({
         attributes: [
@@ -143,7 +174,16 @@ async function createDocx(inputName) {
     const docxName = inputName + "-" + "Generate at " + moment().format('YYYYMMDD')
     const docxPath = `./assets/files/${docxName}.docx`;
 
-    const headingPromFunc = ( inputName === "今日" ) ? selectTodayheadings : selectHeadingByText;
+    // const headingPromFunc = ( inputName === "今日" ) ? selectTodayheadings : selectHeadingByText;
+    let headingPromFunc;
+
+    if (inputName === "今日") {
+        headingPromFunc = selectTodayheadings;
+    } else if (inputName.includes("-")) {
+        headingPromFunc = selectHeadingsBetweenDays;
+    } else {
+        headingPromFunc = selectHeadingByText;
+    }
 
     const headingsProm = headingPromFunc(inputName);
 
