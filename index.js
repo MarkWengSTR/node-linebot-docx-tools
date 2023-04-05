@@ -102,7 +102,7 @@ function parseAndExec(messageText) {
     "-": storeHeading,
     "網頁": (_) => ("https://worklinebot.servehttp.com"),
     "手冊": manual,
-    "gpt": chatWithGPT3,
+    "AI": chatWithGPT,
   }
 
   const [funcCommend, text] = messageText.replaceAll(' ', '').split(/:|：/)
@@ -181,19 +181,18 @@ async function imageProcess(event) {
   return `${imageFileStoreMsg} && ${imageRecStoreMsg}`
 }
 
-async function chatWithGPT3(message) {
+async function chatWithGPT(message) {
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
   });
   const openai = new OpenAIApi(configuration);
 
-  const completion = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: message,
-    max_tokens: 200,
+  const completion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [{role: "user", content: message}],
   });
 
-  return completion.data.choices[0].text.trim()
+  return completion.data.choices[0].message.content.trim()
 }
 
 // listen on port
