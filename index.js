@@ -100,7 +100,7 @@ function parseAndExec(messageText) {
   const exeFuncWithArg = {
     "產生文件": produceDocx,
     "-": storeHeading,
-    "網頁": (_) => ("https://worklinebot.servehttp.com"),
+    "網頁": (_) => ("https://worklinebot.serveblog.net"),
     "手冊": manual,
     "AI": chatWithGPT,
   }
