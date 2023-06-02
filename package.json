@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@line/bot-sdk": "^7.3.0",
+    "axios": "^1.4.0",
     "docx": "^7.4.1",
     "dotenv": "^16.0.1",
     "eta": "^1.12.3",

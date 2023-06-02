@@ -11,6 +11,7 @@ const docxLinebot = require("./docx-linebot");
 const { pipeline } = require('stream');
 const uuid = require("uuid")
 const { Configuration, OpenAIApi } = require("openai");
+const smartSensor = require("./smart-sensor");
 
 // create LINE SDK config from env variables
 const config = {
@@ -103,6 +104,7 @@ function parseAndExec(messageText) {
     "網頁": (_) => ("https://worklinebot.serveblog.net"),
     "手冊": manual,
     "AI": chatWithGPT,
+    "ABB": getABBAuth,
   }
 
   const [funcCommend, text] = messageText.replaceAll(' ', '').split(/:|：/)
@@ -193,6 +195,13 @@ async function chatWithGPT(message) {
   });
 
   return completion.data.choices[0].message.content.trim()
+}
+
+async function getABBAuth() {
+  return smartSensor.auth()
+    .then((res) => {
+      return `user : ${res.data.user_claims.UserName} && OrganizationName : ${res.data.user_claims.OrganizationName}`
+    })
 }
 
 // listen on port
