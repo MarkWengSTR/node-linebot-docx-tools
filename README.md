@@ -1,3 +1,7 @@
+# How to use
+
+https://www.youtube.com/watch?v=nCYxdchmNkE
+
 # Echo Bot
 
 An example LINE bot just to echo messages
